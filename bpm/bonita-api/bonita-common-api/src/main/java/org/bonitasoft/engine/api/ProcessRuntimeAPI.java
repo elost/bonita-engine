@@ -68,6 +68,7 @@ import org.bonitasoft.engine.job.FailedJob;
 import org.bonitasoft.engine.operation.Operation;
 import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchResult;
+import org.bonitasoft.engine.exception.BonitaException;
 
 /**
  * <code>ProcessRuntimeAPI</code> deals with Process runtime notions such as starting a new instance of a process, retrieving and executing tasks, accessing to
@@ -469,6 +470,8 @@ public interface ProcessRuntimeAPI {
      */
     ProcessInstance startProcess(final long userId, final long processDefinitionId, final Map<String, Serializable> initialVariables)
             throws ProcessDefinitionNotFoundException, ProcessActivationException, ProcessExecutionException;
+
+    void setConnectorState(long connectorInstanceId, String state) throws BonitaException;
 
     /**
      * Execute an activity that is in an unstable state.

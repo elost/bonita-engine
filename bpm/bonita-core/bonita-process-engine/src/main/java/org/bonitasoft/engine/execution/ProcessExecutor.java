@@ -26,6 +26,8 @@ import org.bonitasoft.engine.core.process.instance.api.exceptions.SFlowNodeExecu
 import org.bonitasoft.engine.core.process.instance.api.exceptions.SFlowNodeReadException;
 import org.bonitasoft.engine.core.process.instance.api.exceptions.SProcessInstanceCreationException;
 import org.bonitasoft.engine.core.process.instance.model.SProcessInstance;
+import org.bonitasoft.engine.core.process.instance.model.SConnectorInstance;
+import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceModificationException;
 
 /**
  * @author Baptiste Mesta
@@ -56,4 +58,6 @@ public interface ProcessExecutor extends ContainerExecutor {
 
     void handleProcessCompletion(final SProcessDefinition sProcessDefinition, final SProcessInstance sProcessInstance, final boolean hasActionsToExecute)
             throws SBonitaException;
+
+    void setConnectorState(final SConnectorInstance sConnectorInstance, final String state) throws SConnectorInstanceModificationException;
 }

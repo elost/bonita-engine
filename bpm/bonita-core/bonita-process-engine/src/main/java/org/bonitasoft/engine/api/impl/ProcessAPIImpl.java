@@ -13,8 +13,6 @@
  **/
 package org.bonitasoft.engine.api.impl;
 
-import static java.util.Collections.singletonMap;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -233,6 +231,9 @@ import org.bonitasoft.engine.core.connector.ConnectorInstanceService;
 import org.bonitasoft.engine.core.connector.ConnectorResult;
 import org.bonitasoft.engine.core.connector.ConnectorService;
 import org.bonitasoft.engine.core.connector.exception.SConnectorException;
+import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceModificationException;
+import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceNotFoundException;
+import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceReadException;
 import org.bonitasoft.engine.core.connector.parser.SConnectorImplementationDescriptor;
 import org.bonitasoft.engine.core.expression.control.api.ExpressionResolverService;
 import org.bonitasoft.engine.core.expression.control.model.SExpressionContext;
@@ -284,6 +285,7 @@ import org.bonitasoft.engine.core.process.instance.api.exceptions.SProcessInstan
 import org.bonitasoft.engine.core.process.instance.api.exceptions.SProcessInstanceReadException;
 import org.bonitasoft.engine.core.process.instance.api.states.FlowNodeState;
 import org.bonitasoft.engine.core.process.instance.model.SActivityInstance;
+import org.bonitasoft.engine.core.process.instance.model.SConnectorInstance;
 import org.bonitasoft.engine.core.process.instance.model.SFlowElementsContainerType;
 import org.bonitasoft.engine.core.process.instance.model.SFlowNodeInstance;
 import org.bonitasoft.engine.core.process.instance.model.SHumanTaskInstance;
@@ -312,6 +314,7 @@ import org.bonitasoft.engine.dependency.DependencyService;
 import org.bonitasoft.engine.dependency.model.ScopeType;
 import org.bonitasoft.engine.document.SDocumentNotFoundException;
 import org.bonitasoft.engine.exception.AlreadyExistsException;
+import org.bonitasoft.engine.exception.BonitaException;
 import org.bonitasoft.engine.exception.BonitaHomeNotSetException;
 import org.bonitasoft.engine.exception.BonitaRuntimeException;
 import org.bonitasoft.engine.exception.CreationException;
@@ -437,6 +440,8 @@ import org.bonitasoft.engine.supervisor.mapping.model.SProcessSupervisorBuilderF
 import org.bonitasoft.engine.transaction.UserTransactionService;
 import org.bonitasoft.engine.xml.Parser;
 import org.bonitasoft.engine.xml.XMLWriter;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * @author Baptiste Mesta
@@ -890,6 +895,26 @@ public class ProcessAPIImpl implements ProcessAPI {
             executeFlowNode(0, flownodeInstanceId, true);
         } catch (final SBonitaException e) {
             throw new FlowNodeExecutionException(e);
+        }
+    }
+
+    @Override
+    public void setConnectorState(long connectorInstanceId, String state) throws BonitaException {
+        final TenantServiceAccessor tenantAccessor = getTenantAccessor();
+        final ConnectorInstanceService connectorInstanceService = tenantAccessor.getConnectorInstanceService();
+
+        try {
+            SConnectorInstance sConnectorInstance = connectorInstanceService.getConnectorInstance(connectorInstanceId);
+            connectorInstanceService.setState(sConnectorInstance, state);
+        }
+        catch (SConnectorInstanceModificationException e) {
+            throw new BonitaException(e);
+        }
+        catch (SConnectorInstanceReadException e) {
+            throw new BonitaException(e);
+        }
+        catch (SConnectorInstanceNotFoundException e) {
+            throw new BonitaException(e);
         }
     }
 
@@ -3410,7 +3435,7 @@ public class ProcessAPIImpl implements ProcessAPI {
 
     /**
      * execute the connector and return connector output if there is no operation or operation output if there is operation
-     * 
+     *
      * @param operations
      * @param operationInputValues
      */

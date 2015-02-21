@@ -45,6 +45,7 @@ import org.bonitasoft.engine.core.connector.ConnectorResult;
 import org.bonitasoft.engine.core.connector.ConnectorService;
 import org.bonitasoft.engine.core.connector.exception.SConnectorException;
 import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceReadException;
+import org.bonitasoft.engine.core.connector.exception.SConnectorInstanceModificationException;
 import org.bonitasoft.engine.core.expression.control.api.ExpressionResolverService;
 import org.bonitasoft.engine.core.expression.control.model.SExpressionContext;
 import org.bonitasoft.engine.core.operation.OperationService;
@@ -394,6 +395,11 @@ public class ProcessExecutorImpl implements ProcessExecutor {
         final List<SConnectorInstance> connectorInstances = connectorInstanceService.getConnectorInstances(processInstance.getId(),
                 SConnectorInstance.PROCESS_TYPE, event, 0, 1, ConnectorService.TO_BE_EXECUTED);
         return connectorInstances.size() == 1 ? connectorInstances.get(0) : null;
+    }
+
+    @Override
+    public void setConnectorState(final SConnectorInstance sConnectorInstance, final String state) throws SConnectorInstanceModificationException {
+      connectorInstanceService.setState(sConnectorInstance, state);
     }
 
     @Override
